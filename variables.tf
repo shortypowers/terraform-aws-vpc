@@ -3,6 +3,11 @@ variable "name" {
   default     = ""
 }
 
+variable "provider" {
+  description = "Provider to use for resource creation"
+  default     = "aws"
+}
+
 variable "cidr" {
   description = "The CIDR block for the VPC"
   default     = ""

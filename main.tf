@@ -2,6 +2,8 @@
 # VPC
 ######
 resource "aws_vpc" "this" {
+  provider = "${var.provider}"
+
   cidr_block           = "${var.cidr}"
   instance_tenancy     = "${var.instance_tenancy}"
   enable_dns_hostnames = "${var.enable_dns_hostnames}"
@@ -14,6 +16,8 @@ resource "aws_vpc" "this" {
 # Internet Gateway
 ###################
 resource "aws_internet_gateway" "this" {
+  provider = "${var.provider}"
+
   count = "${length(var.public_subnets) > 0 ? 1 : 0}"
 
   vpc_id = "${aws_vpc.this.id}"
@@ -25,6 +29,8 @@ resource "aws_internet_gateway" "this" {
 # Publiс routes
 ################
 resource "aws_route_table" "public" {
+  provider = "${var.provider}"
+
   count = "${length(var.public_subnets) > 0 ? 1 : 0}"
 
   vpc_id           = "${aws_vpc.this.id}"
@@ -34,6 +40,8 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route" "public_internet_gateway" {
+  provider = "${var.provider}"
+
   count = "${length(var.public_subnets) > 0 ? 1 : 0}"
 
   route_table_id         = "${aws_route_table.public.id}"
@@ -45,6 +53,8 @@ resource "aws_route" "public_internet_gateway" {
 # Private routes
 #################
 resource "aws_route_table" "private" {
+  provider = "${var.provider}"
+
   count = "${length(var.azs)}"
 
   vpc_id           = "${aws_vpc.this.id}"
@@ -57,6 +67,8 @@ resource "aws_route_table" "private" {
 # Public subnet
 ################
 resource "aws_subnet" "public" {
+  provider = "${var.provider}"
+
   count = "${length(var.public_subnets)}"
 
   vpc_id                  = "${aws_vpc.this.id}"
@@ -71,6 +83,8 @@ resource "aws_subnet" "public" {
 # Private subnet
 #################
 resource "aws_subnet" "private" {
+  provider = "${var.provider}"
+
   count = "${length(var.private_subnets)}"
 
   vpc_id            = "${aws_vpc.this.id}"
@@ -84,6 +98,8 @@ resource "aws_subnet" "private" {
 # Database subnet
 ##################
 resource "aws_subnet" "database" {
+  provider = "${var.provider}"
+
   count = "${length(var.database_subnets)}"
 
   vpc_id            = "${aws_vpc.this.id}"
@@ -94,6 +110,8 @@ resource "aws_subnet" "database" {
 }
 
 resource "aws_db_subnet_group" "database" {
+  provider = "${var.provider}"
+
   count = "${length(var.database_subnets) > 0 && var.create_database_subnet_group ? 1 : 0}"
 
   name        = "${var.name}"
@@ -107,6 +125,8 @@ resource "aws_db_subnet_group" "database" {
 # ElastiCache subnet
 #####################
 resource "aws_subnet" "elasticache" {
+  provider = "${var.provider}"
+
   count = "${length(var.elasticache_subnets)}"
 
   vpc_id            = "${aws_vpc.this.id}"
@@ -117,6 +137,8 @@ resource "aws_subnet" "elasticache" {
 }
 
 resource "aws_elasticache_subnet_group" "elasticache" {
+  provider = "${var.provider}"
+
   count = "${length(var.elasticache_subnets) > 0 ? 1 : 0}"
 
   name        = "${var.name}"
@@ -128,12 +150,16 @@ resource "aws_elasticache_subnet_group" "elasticache" {
 # NAT Gateway
 ##############
 resource "aws_eip" "nat" {
+  provider = "${var.provider}"
+
   count = "${var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.azs)) : 0}"
 
   vpc = true
 }
 
 resource "aws_nat_gateway" "this" {
+  provider = "${var.provider}"
+
   count = "${var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.azs)) : 0}"
 
   allocation_id = "${element(aws_eip.nat.*.id, (var.single_nat_gateway ? 0 : count.index))}"
@@ -145,6 +171,8 @@ resource "aws_nat_gateway" "this" {
 }
 
 resource "aws_route" "private_nat_gateway" {
+  provider = "${var.provider}"
+
   count = "${var.enable_nat_gateway ? length(var.azs) : 0}"
 
   route_table_id         = "${element(aws_route_table.private.*.id, count.index)}"
@@ -156,12 +184,16 @@ resource "aws_route" "private_nat_gateway" {
 # VPC Endpoint for S3
 ######################
 data "aws_vpc_endpoint_service" "s3" {
+  provider = "${var.provider}"
+
   count = "${var.enable_s3_endpoint}"
 
   service = "s3"
 }
 
 resource "aws_vpc_endpoint" "s3" {
+  provider = "${var.provider}"
+
   count = "${var.enable_s3_endpoint}"
 
   vpc_id       = "${aws_vpc.this.id}"
@@ -169,6 +201,8 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "private_s3" {
+  provider = "${var.provider}"
+
   count = "${var.enable_s3_endpoint ? length(var.private_subnets) : 0}"
 
   vpc_endpoint_id = "${aws_vpc_endpoint.s3.id}"
@@ -176,6 +210,8 @@ resource "aws_vpc_endpoint_route_table_association" "private_s3" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "public_s3" {
+  provider = "${var.provider}"
+
   count = "${var.enable_s3_endpoint ? length(var.public_subnets) : 0}"
 
   vpc_endpoint_id = "${aws_vpc_endpoint.s3.id}"
@@ -186,12 +222,16 @@ resource "aws_vpc_endpoint_route_table_association" "public_s3" {
 # VPC Endpoint for DynamoDB
 ############################
 data "aws_vpc_endpoint_service" "dynamodb" {
+  provider = "${var.provider}"
+
   count = "${var.enable_dynamodb_endpoint}"
 
   service = "dynamodb"
 }
 
 resource "aws_vpc_endpoint" "dynamodb" {
+  provider = "${var.provider}"
+
   count = "${var.enable_dynamodb_endpoint}"
 
   vpc_id       = "${aws_vpc.this.id}"
@@ -199,6 +239,8 @@ resource "aws_vpc_endpoint" "dynamodb" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "private_dynamodb" {
+  provider = "${var.provider}"
+
   count = "${var.enable_dynamodb_endpoint ? length(var.private_subnets) : 0}"
 
   vpc_endpoint_id = "${aws_vpc_endpoint.dynamodb.id}"
@@ -206,6 +248,8 @@ resource "aws_vpc_endpoint_route_table_association" "private_dynamodb" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "public_dynamodb" {
+  provider = "${var.provider}"
+
   count = "${var.enable_dynamodb_endpoint ? length(var.public_subnets) : 0}"
 
   vpc_endpoint_id = "${aws_vpc_endpoint.dynamodb.id}"
@@ -216,6 +260,8 @@ resource "aws_vpc_endpoint_route_table_association" "public_dynamodb" {
 # Route table association
 ##########################
 resource "aws_route_table_association" "private" {
+  provider = "${var.provider}"
+
   count = "${length(var.private_subnets)}"
 
   subnet_id      = "${element(aws_subnet.private.*.id, count.index)}"
@@ -223,6 +269,8 @@ resource "aws_route_table_association" "private" {
 }
 
 resource "aws_route_table_association" "database" {
+  provider = "${var.provider}"
+
   count = "${length(var.database_subnets)}"
 
   subnet_id      = "${element(aws_subnet.database.*.id, count.index)}"
@@ -230,6 +278,8 @@ resource "aws_route_table_association" "database" {
 }
 
 resource "aws_route_table_association" "elasticache" {
+  provider = "${var.provider}"
+
   count = "${length(var.elasticache_subnets)}"
 
   subnet_id      = "${element(aws_subnet.elasticache.*.id, count.index)}"
@@ -237,6 +287,8 @@ resource "aws_route_table_association" "elasticache" {
 }
 
 resource "aws_route_table_association" "public" {
+  provider = "${var.provider}"
+
   count = "${length(var.public_subnets)}"
 
   subnet_id      = "${element(aws_subnet.public.*.id, count.index)}"
