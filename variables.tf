@@ -3,6 +3,11 @@ variable "name" {
   default     = ""
 }
 
+variable "region" {
+  description = "Region to use for all resources"
+  default     = ""
+}
+
 variable "cidr" {
   description = "The CIDR block for the VPC"
   default     = ""
