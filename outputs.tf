@@ -1,4 +1,4 @@
-ouptut "region" {
+output "region" {
   description = "The region of all VPC resources"
   value       = "${aws_vpc.this.region}"
 }
