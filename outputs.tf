@@ -3,7 +3,7 @@ ouptut "region" {
   value       = "${aws_vpc.this.region}"
 }
 
-VPC output "vpc_id" {
+output "vpc_id" {
   description = "The ID of the VPC"
   value       = "${aws_vpc.this.id}"
 }
