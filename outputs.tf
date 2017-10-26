@@ -1,5 +1,9 @@
-# VPC
-output "vpc_id" {
+ouptut "region" {
+  description = "The region of all VPC resources"
+  value       = "${aws_vpc.this.region}"
+}
+
+VPC output "vpc_id" {
   description = "The ID of the VPC"
   value       = "${aws_vpc.this.id}"
 }
